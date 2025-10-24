@@ -1,0 +1,108 @@
+name: Generate SwiftUI Project Template
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: macos-latest
+
+    steps:
+      - name: Create SwiftUI Xcode Project (no Xcode needed)
+        run: |
+          set -eux
+          mkdir MyApp
+          cd MyApp
+
+          # Create basic structure
+          mkdir -p MyApp/Assets.xcassets
+          mkdir -p MyApp.xcodeproj
+
+          # Info.plist
+          cat > MyApp/Info.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleIdentifier</key>
+            <string>com.hecarim.autoapp</string>
+            <key>CFBundleName</key>
+            <string>MyApp</string>
+            <key>UILaunchStoryboardName</key>
+            <string>LaunchScreen</string>
+          </dict>
+          </plist>
+          EOF
+
+          # ContentView.swift
+          cat > MyApp/ContentView.swift <<'EOF'
+          import SwiftUI
+
+          struct ContentView: View {
+              var body: some View {
+                  VStack {
+                      Image(systemName: "bolt.fill")
+                          .imageScale(.large)
+                          .foregroundColor(.orange)
+                      Text("🚀 Hello from Hecarim’s iPhone")
+                          .font(.headline)
+                  }
+                  .padding()
+              }
+          }
+
+          struct ContentView_Previews: PreviewProvider {
+              static var previews: some View {
+                  ContentView()
+              }
+          }
+          EOF
+
+          # App entry point
+          cat > MyApp/MyAppApp.swift <<'EOF'
+          import SwiftUI
+
+          @main
+          struct MyAppApp: App {
+              var body: some Scene {
+                  WindowGroup {
+                      ContentView()
+                  }
+              }
+          }
+          EOF
+
+          # Minimal project.pbxproj
+          cat > MyApp.xcodeproj/project.pbxproj <<'EOF'
+          // !$*UTF8*$!
+          {
+              archiveVersion = 1;
+              classes = {};
+              objectVersion = 56;
+              rootObject = 1D6058900D05DD3D006BFB54;
+              objects = {
+                  1D6058900D05DD3D006BFB54 = {
+                      isa = PBXProject;
+                      buildConfigurationList = 1D6058A00D05DD3E006BFB54;
+                      compatibilityVersion = "Xcode 12.0";
+                      developmentRegion = en;
+                      hasScannedForEncodings = 0;
+                      knownRegions = ( en, Base, );
+                      mainGroup = 1D6058910D05DD3D006BFB54;
+                      productRefGroup = 1D6058910D05DD3D006BFB54;
+                      projectDirPath = "";
+                      projectRoot = "";
+                  };
+              };
+          }
+          EOF
+
+          cd ..
+          zip -r swiftui_template.zip MyApp
+          ls -lh swiftui_template.zip
+
+      - name: Upload template zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: swiftui-template
+          path: swiftui_template.zip
